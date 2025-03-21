@@ -22,7 +22,7 @@ export default function Home() {
             const data = await res.json();
             setResponse(data.message || "No response from AI");
         } catch (error) {
-            console.error("Error fetching AI response:", error);
+            // console.error("Error fetching AI response:", error);
             setResponse("Something went wrong!");
         }
 

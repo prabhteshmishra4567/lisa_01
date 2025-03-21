@@ -1,24 +1,24 @@
-import { NextResponse } from "next/server";
-import axios from "axios";
+/**
+API file
+**/
 
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextResponse } from 'next/server';
 export async function POST(req) {
     try {
-        const { message } = await req.json();
-        if (!message) {
-            return NextResponse.json({ error: "Message is required" }, { status: 400 });
-        }
-
-        const response = await axios.post(
-            "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent",
-            { contents: [{ parts: [{ text: message }] }] },
-            { params: { key: process.env.GEMINI_API_KEY } }
-        );
-
-        const geminiResponse = response.data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
-
-        return NextResponse.json({ message: geminiResponse });
+        
+        const genAI = new GoogleGenerativeAI(process.env.GEMINIAI_API_KEY);
+        
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        
+        const data = await req.json();
+        const prompt = data.body;
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const output = await response.text();
+        return NextResponse.json({ output: output });
     } catch (error) {
-        console.error("Gemini API Error:", error.response?.data || error.message);
-        return NextResponse.json({ error: "Failed to connect to Gemini AI" }, { status: 500 });
+        console.log(error);
+        return NextResponse.json({ error: 'An error occurred while generating content' }, { status: 500 });
     }
 }
